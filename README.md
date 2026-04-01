@@ -17,19 +17,35 @@ Born from the community response to Anthropic's `/buddy` April Fools feature. Th
 
 ## Install
 
-Clone into your Claude Code plugins directory:
+Run these two commands inside Claude Code:
+
+```
+/plugin marketplace add FrankFMY/buddy-evolution
+/plugin install buddy-evolution@buddy-evolution
+```
+
+Restart Claude Code. Your buddy will greet you on the next session start:
+
+```
+🐙 A wild octopus appeared! Meet Cinder!
+   Rarity: rare | Personality: analytical
+   Your companion will track your progress across sessions.
+```
+
+### Alternative: manual install
+
+If you prefer, clone the repo and add hooks to `~/.claude/settings.json` manually:
 
 ```bash
-git clone https://github.com/FrankFMY/buddy-evolution ~/.claude/plugins/buddy-evolution
+git clone https://github.com/FrankFMY/buddy-evolution ~/buddy-evolution
 ```
 
-Or install via marketplace (if available):
+Add to your `~/.claude/settings.json` inside the `"hooks"` object:
 
+```json
+"SessionStart": [{ "hooks": [{ "type": "command", "command": "node ~/buddy-evolution/hooks/session-start.js", "timeout": 5 }] }],
+"SessionEnd": [{ "hooks": [{ "type": "command", "command": "node ~/buddy-evolution/hooks/session-end.js", "timeout": 30 }] }]
 ```
-/plugin install buddy-evolution
-```
-
-Restart Claude Code. Your buddy will greet you on the next session start.
 
 ## Commands
 

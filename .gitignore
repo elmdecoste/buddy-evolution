@@ -1,0 +1,32 @@
+# Claude Code internal
+.claude/
+*.local.md
+.plans/
+.notes/
+
+# Dev notes
+TODO.md
+PLANNING.md
+DEVLOG.md
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node
+node_modules/
+
+# Test data
+test-data/
+*.test-transcript.jsonl
+
+# Environment
+.env
+.env.*

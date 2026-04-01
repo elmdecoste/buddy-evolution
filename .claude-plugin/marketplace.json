@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "buddy-evolution",
-      "source": ".",
+      "source": "./",
       "description": "Companion progression system — achievements, XP, journal, and stats tracking across sessions",
       "version": "1.0.0",
       "homepage": "https://buddy.frankfmy.com",

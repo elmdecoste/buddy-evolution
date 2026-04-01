@@ -48,7 +48,8 @@ async function main() {
     ].join('\n');
   } else {
     const tier = soul.progression.tier.charAt(0).toUpperCase() + soul.progression.tier.slice(1);
-    greeting = `${emoji} ${soul.identity.name} welcomes you! Level ${soul.progression.level} ${tier} | Streak: ${soul.streak.currentDays} days${streakStr} | ${xpStr}`;
+    const dayWord = soul.streak.currentDays === 1 ? 'day' : 'days';
+    greeting = `${emoji} ${soul.identity.name} welcomes you! Level ${soul.progression.level} ${tier} | Streak: ${soul.streak.currentDays} ${dayWord}${streakStr} | ${xpStr}`;
   }
 
   // Output greeting to stderr (visible to user)
@@ -58,7 +59,7 @@ async function main() {
   const context = [
     `Buddy companion: ${soul.identity.name} the ${soul.identity.species} (${soul.identity.rarity}, ${soul.identity.personality}).`,
     `Level ${soul.progression.level} ${soul.progression.tier}. ${xpStr}.`,
-    `Streak: ${soul.streak.currentDays} days.`,
+    `Streak: ${soul.streak.currentDays} ${soul.streak.currentDays === 1 ? 'day' : 'days'}.`,
     `Sessions: ${soul.lifetime.sessions}.`,
   ].join(' ');
 

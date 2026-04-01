@@ -81,11 +81,11 @@ Session End ────→ Parse transcript ──→ Extract metrics
 
 | Source | XP |
 |---|---|
-| Session completion | 500 (flat) |
-| Tool call | 50 each |
-| File edit | 100 each |
-| Test run | 200 each |
-| Duration | 100 per 10 min (capped at 3,000) |
+| Session completion | 200 (flat) |
+| Tool call | 5 each |
+| File edit | 15 each |
+| Test run | 30 each |
+| Duration | 20 per 10 min (capped at 300) |
 | Streak multiplier | 1.0x → 2.0x over 11 consecutive days |
 
 ### Achievements

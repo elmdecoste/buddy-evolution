@@ -32,7 +32,7 @@ buddy-evolution is a Claude Code plugin that turns your coding sessions into a p
 
 ## Progression
 
-- **XP Sources**: Tool calls (50 XP), file edits (100 XP), test runs (200 XP), duration bonus, session completion (500 XP flat)
+- **XP Sources**: Tool calls (5 XP), file edits (15 XP), test runs (30 XP), duration bonus (20 per 10 min), session completion (200 XP flat)
 - **Streak**: Consecutive days multiply XP (1.0x → 2.0x over 11 days)
 - **Levels**: 1-20, with evolution tiers at levels 5, 10, 15, 20
 - **Stats**: DEBUGGING, PATIENCE, CHAOS, WISDOM, SNARK — grow from your activity patterns with diminishing returns

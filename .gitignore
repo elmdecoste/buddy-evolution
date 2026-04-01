@@ -30,3 +30,4 @@ test-data/
 # Environment
 .env
 .env.*
+IMPROVEMENTS.md

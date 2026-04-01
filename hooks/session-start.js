@@ -3,13 +3,12 @@
 
 const path = require('path');
 
-// Resolve lib from plugin root (hooks/ is one level deep)
 const libDir = path.join(__dirname, '..', 'lib');
 const { ensureDataDir, loadSoul, createSoul, getSpeciesInfo } = require(path.join(libDir, 'soul'));
-const { getStreakMultiplier, updateStreak, getXPForNextLevel } = require(path.join(libDir, 'xp'));
+const { getStreakMultiplier, updateStreak, getXPForNextLevel, formatProgressBar } = require(path.join(libDir, 'xp'));
+const { LEVEL_THRESHOLDS } = require(path.join(libDir, 'constants'));
 
 async function main() {
-  // Read hook input from stdin
   let input = '';
   for await (const chunk of process.stdin) input += chunk;
 
@@ -25,7 +24,6 @@ async function main() {
     isFirstRun = true;
   }
 
-  // Update streak on session start (so greeting shows current streak)
   const today = new Date().toISOString().slice(0, 10);
   updateStreak(soul, today);
 
@@ -34,6 +32,8 @@ async function main() {
   const streakMult = getStreakMultiplier(soul.streak.currentDays);
   const streakStr = streakMult > 1.0 ? ` (🔥 ${streakMult.toFixed(1)}x)` : '';
   const nextLevelXP = getXPForNextLevel(soul.progression.level);
+  const currentLevelXP = LEVEL_THRESHOLDS[soul.progression.level - 1] || 0;
+
   const xpStr = nextLevelXP
     ? `${soul.progression.totalXP.toLocaleString('en-US')} / ${nextLevelXP.toLocaleString('en-US')} XP`
     : `${soul.progression.totalXP.toLocaleString('en-US')} XP (MAX)`;
@@ -49,13 +49,34 @@ async function main() {
   } else {
     const tier = soul.progression.tier.charAt(0).toUpperCase() + soul.progression.tier.slice(1);
     const dayWord = soul.streak.currentDays === 1 ? 'day' : 'days';
-    greeting = `${emoji} ${soul.identity.name} welcomes you! Level ${soul.progression.level} ${tier} | Streak: ${soul.streak.currentDays} ${dayWord}${streakStr} | ${xpStr}`;
+    const bar = nextLevelXP
+      ? formatProgressBar(soul.progression.totalXP - currentLevelXP, nextLevelXP - currentLevelXP, 15)
+      : '███████████████';
+
+    const lines = [
+      `${emoji} ${soul.identity.name} welcomes you! Level ${soul.progression.level} ${tier} ${bar} ${xpStr}`,
+      `   Streak: ${soul.streak.currentDays} ${dayWord}${streakStr} | Sessions: ${soul.lifetime.sessions}`,
+    ];
+
+    // Show last session diff
+    if (soul.lastSession) {
+      const ls = soul.lastSession;
+      let diffParts = [`+${ls.xp.toLocaleString('en-US')} XP`];
+      if (ls.achievements && ls.achievements.length > 0) {
+        const achStr = ls.achievements.slice(0, 3).map(a => `🏆 ${a}`).join(', ');
+        diffParts.push(achStr);
+      }
+      if (ls.levelBefore !== ls.levelAfter) {
+        diffParts.push(`Level ${ls.levelBefore} → ${ls.levelAfter}`);
+      }
+      lines.push(`   Last session: ${diffParts.join(' | ')}`);
+    }
+
+    greeting = lines.join('\n');
   }
 
-  // Output greeting to stderr (visible to user)
   process.stderr.write(greeting + '\n');
 
-  // Output context for Claude via stdout JSON
   const context = [
     `Buddy companion: ${soul.identity.name} the ${soul.identity.species} (${soul.identity.rarity}, ${soul.identity.personality}).`,
     `Level ${soul.progression.level} ${soul.progression.tier}. ${xpStr}.`,
@@ -76,5 +97,5 @@ async function main() {
 
 main().catch(err => {
   process.stderr.write(`[buddy-evolution] session-start error: ${err.message}\n`);
-  process.exit(0); // Don't block session on errors
+  process.exit(0);
 });

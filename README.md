@@ -1,17 +1,21 @@
 # buddy-evolution
 
-Companion progression system for Claude Code. Track achievements, earn XP, grow stats, and maintain a session journal — all automatically.
+Companion progression system for Claude Code. Track achievements, earn XP, grow stats, evolve your buddy, and maintain a session journal — all automatically.
 
 Born from the community response to Anthropic's `/buddy` April Fools feature. The ASCII pet is gone, but the progression lives on.
 
 ## Features
 
 - **34 achievements** across 6 categories — Coding, Testing, Debugging, Consistency, Exploration, Meta
-- **XP & leveling** — earn XP from tool calls, file edits, test runs, and session streaks
-- **Stat growth** — DEBUGGING, PATIENCE, CHAOS, WISDOM, SNARK evolve based on your activity patterns
-- **Session journal** — automatic monthly logs of every session with metrics and milestones
-- **Streak tracking** — consecutive days multiply your XP up to 2x
-- **File familiarity** — your buddy learns which files you work on most
+- **XP & leveling** — 20 levels with streak multipliers up to 2x
+- **Stat growth** — DEBUGGING, PATIENCE, CHAOS, WISDOM, SNARK evolve from your activity patterns with diminishing returns
+- **Evolution paths** — choose your buddy's evolution at Level 5 and 10 (18 species x 4 final forms)
+- **Session journal** — automatic monthly logs with weekly summaries
+- **Session recap** — see what happened last session when you start a new one
+- **File familiarity** — track files across projects (New → Familiar → Expert → Nostalgic)
+- **Per-project stats** — XP and sessions tracked per project
+- **Desktop notifications** — OS-native alerts on achievement unlock (Linux/macOS)
+- **Export card** — shareable stats card you can copy-paste anywhere
 - **Zero dependencies** — pure Node.js, no npm install required
 - **Fully local** — no data leaves your machine
 
@@ -32,9 +36,25 @@ Restart Claude Code. Your buddy will greet you on the next session start:
    Your companion will track your progress across sessions.
 ```
 
+After your first session ends, you'll see:
+
+```
+🐙 Session complete! +615 XP
+   Level 2 ████████████░░░░░░░░ 1,615 / 3,000 XP
+   🏆 First Steps — Complete your first session (+100 XP)
+```
+
+And on the next start:
+
+```
+🐙 Cinder welcomes you! Level 2 Hatchling ████████░░░░░░░ 1,615 / 3,000 XP
+   Streak: 1 day | Sessions: 1
+   Last session: +615 XP | 🏆 First Steps | Level 1 → 2
+```
+
 ### Alternative: manual install
 
-If you prefer, clone the repo and add hooks to `~/.claude/settings.json` manually:
+Clone the repo and add hooks to `~/.claude/settings.json` manually:
 
 ```bash
 git clone https://github.com/FrankFMY/buddy-evolution ~/buddy-evolution
@@ -51,15 +71,18 @@ Add to your `~/.claude/settings.json` inside the `"hooks"` object:
 
 | Command | Description |
 |---|---|
-| `/buddy-evolution:stats` | Level, XP, stats, streak, tier |
+| `/buddy-evolution:stats` | Level, XP, stats, streak, top files, top projects |
 | `/buddy-evolution:achievements` | Earned, in-progress, locked achievements |
-| `/buddy-evolution:journal` | Recent session history |
+| `/buddy-evolution:journal` | Recent session history + weekly summaries |
+| `/buddy-evolution:evolve` | Choose evolution path (Level 5 / 10) |
+| `/buddy-evolution:rename` | Rename your buddy |
+| `/buddy-evolution:export` | Generate shareable stats card |
 | `/buddy-evolution:help` | How the plugin works |
 
 ## How It Works
 
 ```
-Session Start ──→ Greeting with current stats and streak
+Session Start ──→ Greeting + last session recap
        │
    You code normally (plugin doesn't interfere)
        │
@@ -69,12 +92,12 @@ Session End ────→ Parse transcript ──→ Extract metrics
                     │                      │
               Update stats          Check achievements
               Calculate XP          Update familiarity
-              Check level up        Generate journal entry
+              Check level up        Desktop notifications
                     │                      │
                     └──────────┬───────────┘
                                │
-                         Save soul file
-                         Print summary
+                    Save soul + journal entry
+                    Print summary + progress bar
 ```
 
 ### XP Sources
@@ -87,6 +110,17 @@ Session End ────→ Parse transcript ──→ Extract metrics
 | Test run | 30 each |
 | Duration | 20 per 10 min (capped at 300) |
 | Streak multiplier | 1.0x → 2.0x over 11 consecutive days |
+
+### Evolution
+
+At Level 5 and 10, your buddy can evolve. Each of the 18 species has unique evolution paths — 2 choices at Level 5, then 2 sub-choices at Level 10, giving 4 possible final forms per species. Use `/buddy-evolution:evolve` to choose.
+
+```
+🐙 Cinder is ready to evolve!
+
+  [A] Strategist — calculated, always three steps ahead
+  [B] Artist — creative, sees patterns others miss
+```
 
 ### Achievements
 
@@ -145,8 +179,8 @@ Session End ────→ Parse transcript ──→ Extract metrics
 | Achievement | Trigger | XP | Rarity |
 |---|---|---|---|
 | Pet Day | Pet buddy 10 times | 50 | Common |
-| First Evolution | Level 5 choice | 1,000 | Uncommon |
-| Final Form | Level 10 choice | 3,000 | Rare |
+| First Evolution | Level 5 evolution choice | 1,000 | Uncommon |
+| Final Form | Level 10 evolution choice | 3,000 | Rare |
 | The Collector | 20 achievements | 2,000 | Epic |
 | 🔒 Hidden | ??? | ??? | Legendary |
 | 🔒 Hidden | ??? | ??? | Legendary |
@@ -159,9 +193,9 @@ All data is stored locally at `~/.buddy-evolution/`:
 
 ```
 ~/.buddy-evolution/
-├── soul.json              # Companion state
+├── soul.json              # Companion state (identity, stats, achievements, progression)
 └── journal/
-    ├── 2026-04.md         # April sessions
+    ├── 2026-04.md         # April sessions + weekly summaries
     └── 2026-05.md         # May sessions
 ```
 
@@ -174,12 +208,16 @@ On April 1, 2026, Anthropic released `/buddy` — a Tamagotchi-style ASCII compa
 This plugin implements the community-designed [buddy evolution specification](https://github.com/Hegemon78/buddy-evolution-spec):
 - Achievement-based progression (not idle grinding)
 - Stats that reflect your coding patterns
-- Session journal for retrospective value
+- Session journal with weekly summaries
 - File familiarity tracking
+- Evolution branching paths
 
 ## Contributing
 
-Issues and PRs welcome. The plugin is designed to be extensible — new achievements, stats, and features can be added by modifying `lib/achievements.js` and `lib/constants.js`.
+Issues and PRs welcome. The plugin is designed to be extensible:
+- Add achievements in `lib/achievements.js`
+- Add species or tune XP in `lib/constants.js`
+- Add skills in `skills/`
 
 ## License
 

@@ -57,8 +57,8 @@ const VIBE_MESSAGES = {
 
 // ── XP bar ──────────────────────────────────────────────────────────
 const LEVEL_THRESHOLDS = [
-  0, 1000, 3000, 6000, 10000, 16000, 24000, 35000, 50000, 70000,
-  95000, 125000, 160000, 200000, 250000, 310000, 380000, 460000, 550000, 650000,
+  0, 500, 1500, 3500, 7000, 12000, 20000, 32000, 50000, 75000,
+  110000, 155000, 215000, 290000, 385000, 500000, 650000, 840000, 1100000, 1450000,
 ];
 
 function getXPProgress(level, totalXP) {
@@ -221,8 +221,29 @@ function getMessageIndex(messages, now) {
   return hashInt(bucket + 31) % messages.length;
 }
 
+// ── Prestige terrain ────────────────────────────────────────────────
+const PRESTIGE_TERRAINS = [
+  { char: '·', color: null },
+  { char: '░', color: '\x1b[37m' },
+  { char: '▒', color: '\x1b[35m' },
+  { char: '~', color: '\x1b[36m' },
+  { char: '✦', color: '\x1b[33m' },
+  { char: '◆', color: '\x1b[34m' },
+  { char: '❋', color: '\x1b[32m' },
+  { char: '⚡', color: '\x1b[33m' },
+  { char: '♦', color: '\x1b[31m' },
+  { char: '∞', color: '\x1b[35m' },
+];
+
+function getTerrainTile(prestige) {
+  const t = PRESTIGE_TERRAINS[Math.min(prestige || 0, PRESTIGE_TERRAINS.length - 1)];
+  if (t.color) return `${t.color}${t.char}\x1b[39m`;
+  return dim(t.char);
+}
+
 // ── Render the 3-row track ──────────────────────────────────────────
-function renderTrack(buddyX, buddyY, emoji, speech) {
+function renderTrack(buddyX, buddyY, emoji, speech, prestige) {
+  const tile = getTerrainTile(prestige);
   const rows = [];
   for (let row = 0; row < TRACK_H; row++) {
     let line = '';
@@ -233,7 +254,7 @@ function renderTrack(buddyX, buddyY, emoji, speech) {
       } else if (col === buddyX + 1 && isBuddyRow) {
         continue; // emoji is double-width
       } else {
-        line += dim('·');
+        line += tile;
       }
     }
     if (isBuddyRow && speech) {
@@ -289,13 +310,15 @@ async function main() {
   }
 
   // Render
-  const trackRows = renderTrack(npc.x, npc.y, identity.emoji, speech);
+  const prestige = progression.prestige || 0;
+  const trackRows = renderTrack(npc.x, npc.y, identity.emoji, speech, prestige);
   const streakText = streak.currentDays > 0 ? yellow(`\u00A0🔥${streak.currentDays}`) : '';
+  const prestigeText = prestige > 0 ? yellow(`\u00A0✧${prestige}`) : '';
   const statsLine = [
     bold(identity.name),
     `${dim('Lv')}${cyan(String(progression.level))}`,
     `${xpBar}\u00A0${xpText}`,
-  ].join('\u00A0\u00A0') + streakText;
+  ].join('\u00A0\u00A0') + streakText + prestigeText;
 
   for (const row of trackRows) {
     console.log(row);

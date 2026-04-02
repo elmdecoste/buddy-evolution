@@ -11,6 +11,9 @@ const { checkAchievements, updateProgress, updateTestDrivenStreak } = require(pa
 const { generateEntry, appendJournal, checkWeeklySummary } = require(path.join(libDir, 'journal'));
 const { sendNotification } = require(path.join(libDir, 'notify'));
 
+const DATA_DIR = path.join(require('os').homedir(), '.buddy-evolution');
+const OFFSET_PATH = path.join(DATA_DIR, 'session-offset.json');
+
 async function main() {
   let input = '';
   for await (const chunk of process.stdin) input += chunk;
@@ -39,15 +42,30 @@ async function main() {
   const levelBefore = soul.progression.level;
 
   // 2. Update lifetime metrics
+  // Stop hooks already incremented tool counters during the session.
+  // Only add session count, duration, and rejected calls here.
+  // Tool counters are skipped if Stop hook was active for this transcript.
   soul.lifetime.sessions++;
   soul.lifetime.durationMinutes += session.durationMinutes;
-  soul.lifetime.toolCalls += session.toolCalls;
   soul.lifetime.rejectedToolCalls += session.rejectedToolCalls;
-  soul.lifetime.fileEdits += session.fileEdits;
-  soul.lifetime.testRuns += session.testRuns;
-  soul.lifetime.bashCalls += session.bashCalls;
-  soul.lifetime.readCalls += session.readCalls;
-  soul.lifetime.grepCalls += session.grepCalls;
+
+  let stopHookWasActive = false;
+  try {
+    const offsetData = JSON.parse(fs.readFileSync(OFFSET_PATH, 'utf-8'));
+    if (offsetData.transcriptPath === transcriptPath) {
+      stopHookWasActive = true;
+    }
+  } catch {}
+
+  if (!stopHookWasActive) {
+    // Fallback: Stop hook didn't run, so count everything here
+    soul.lifetime.toolCalls += session.toolCalls;
+    soul.lifetime.fileEdits += session.fileEdits;
+    soul.lifetime.testRuns += session.testRuns;
+    soul.lifetime.bashCalls += session.bashCalls;
+    soul.lifetime.readCalls += session.readCalls;
+    soul.lifetime.grepCalls += session.grepCalls;
+  }
 
   // 3. Update streak
   const today = new Date().toISOString().slice(0, 10);
@@ -69,7 +87,22 @@ async function main() {
   const newAchievements = checkAchievements(session, soul);
 
   // 9. Calculate XP (session + achievement bonuses)
-  const sessionXP = calculateSessionXP(session, soul.streak.currentDays);
+  // Stop hooks already awarded tool-based XP incrementally during the session.
+  // Session-end awards: flat session bonus + duration bonus (with streak), plus achievements.
+  // We subtract the raw tool XP that Stop hooks already applied.
+  const fullSessionXP = calculateSessionXP(session, soul.streak.currentDays);
+  const rawToolXP = (session.toolCalls * 5) + (session.fileEdits * 15) + (session.testRuns * 30);
+
+  // Read how much tool XP the Stop hook already awarded
+  let stopHookAwarded = 0;
+  try {
+    const offsetData = JSON.parse(require('fs').readFileSync(OFFSET_PATH, 'utf-8'));
+    if (offsetData.transcriptPath === (hookData.transcript_path || hookData.transcriptPath)) {
+      stopHookAwarded = rawToolXP; // Stop hook covered all tool XP up to offset
+    }
+  } catch {}
+
+  const sessionXP = Math.max(0, fullSessionXP - stopHookAwarded);
   const achievementXP = newAchievements.reduce((sum, a) => sum + a.xp, 0);
   const totalXP = sessionXP + achievementXP;
   soul.progression.totalXP += totalXP;
@@ -128,8 +161,15 @@ async function main() {
   for (const a of newAchievements) {
     lines.push(`   🏆 ${a.name} — ${a.description} (+${a.xp.toLocaleString('en-US')} XP)`);
   }
+  if (soul.progression.level >= 20 && (soul.progression.prestige || 0) < 9) {
+    lines.push(`   ✧ MAX LEVEL! Type /buddy-evolution:prestige to ascend and unlock a new terrain.`);
+  }
 
   process.stderr.write(lines.join('\n') + '\n');
+
+  // Clean up offset file so next session starts fresh
+  try { fs.unlinkSync(OFFSET_PATH); } catch {}
+
   process.exit(0);
 }
 

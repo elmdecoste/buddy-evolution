@@ -16,6 +16,7 @@ buddy-evolution is a Claude Code plugin that turns your coding sessions into a p
 | `/buddy-evolution:stats` | Show level, XP, stats, streak |
 | `/buddy-evolution:achievements` | Show earned, in-progress, locked achievements |
 | `/buddy-evolution:journal` | Show recent session history |
+| `/buddy-evolution:prestige` | Prestige at max level — reset with new terrain |
 | `/buddy-evolution:help` | This help page |
 
 ## How it works
@@ -35,6 +36,7 @@ buddy-evolution is a Claude Code plugin that turns your coding sessions into a p
 - **XP Sources**: Tool calls (5 XP), file edits (15 XP), test runs (30 XP), duration bonus (20 per 10 min), session completion (200 XP flat)
 - **Streak**: Consecutive days multiply XP (1.0x → 2.0x over 11 days)
 - **Levels**: 1-20, with evolution tiers at levels 5, 10, 15, 20
+- **Prestige**: At level 20, prestige to reset to level 1 with a new track terrain (10 prestige levels)
 - **Stats**: DEBUGGING, PATIENCE, CHAOS, WISDOM, SNARK — grow from your activity patterns with diminishing returns
 
 ## Achievements

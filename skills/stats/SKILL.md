@@ -18,6 +18,7 @@ Read the buddy soul file at `~/.buddy-evolution/soul.json` and display the compa
 ```
 {emoji} {name} — {rarity} {species} ({personality})
 Level {level} {tier} {progress_bar} {currentXP} / {nextLevelXP} XP
+Prestige: ✧{prestige} — {terrain_name}    (only show if prestige > 0)
 Streak: {days} days {streak_multiplier} | Sessions: {total}
 
 DEBUGGING {bar}  {effective} (+{growth})

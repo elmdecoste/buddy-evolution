@@ -2,6 +2,8 @@
 
 Companion progression system for Claude Code. Track achievements, earn XP, grow stats, evolve your buddy, and maintain a session journal — all automatically.
 
+Originally created by [Artyom Pryanishnikov (FrankFMY)](https://github.com/FrankFMY). Forked and extended by [pressw-llc](https://github.com/pressw-llc).
+
 Born from the community response to Anthropic's `/buddy` April Fools feature. The ASCII pet is gone, but the progression lives on.
 
 ## Features

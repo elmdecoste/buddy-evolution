@@ -24,7 +24,7 @@ Born from the community response to Anthropic's `/buddy` April Fools feature. Th
 Run these two commands inside Claude Code:
 
 ```
-/plugin marketplace add FrankFMY/buddy-evolution
+/plugin marketplace add pressw-llc/buddy-evolution
 /plugin install buddy-evolution@buddy-evolution
 ```
 
@@ -57,7 +57,7 @@ And on the next start:
 Clone the repo and add hooks to `~/.claude/settings.json` manually:
 
 ```bash
-git clone https://github.com/FrankFMY/buddy-evolution ~/buddy-evolution
+git clone https://github.com/pressw-llc/buddy-evolution ~/buddy-evolution
 ```
 
 Add to your `~/.claude/settings.json` inside the `"hooks"` object:

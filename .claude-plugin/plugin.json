@@ -3,10 +3,10 @@
   "version": "1.1.0",
   "description": "Companion progression system for Claude Code — achievements, XP, journal, and stats tracking across sessions",
   "author": {
-    "name": "FrankFMY"
+    "name": "pressw-llc"
   },
   "homepage": "https://buddy.frankfmy.com",
-  "repository": "https://github.com/FrankFMY/buddy-evolution",
+  "repository": "https://github.com/pressw-llc/buddy-evolution",
   "license": "MIT",
   "keywords": ["buddy", "companion", "achievements", "progression", "gamification", "journal"]
 }
